@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "MyDirectSound.h"
 #include "MyDirectSoundBuffer.h"
+#include "SDKwavefile.h"
 
 template< typename T >
 struct delete_pointer {
@@ -174,22 +175,21 @@ HRESULT __stdcall MyDirectSound::Initialize(THIS_ __in_opt LPCGUID pcGuidDevice)
 	return m_pDSound->Initialize(pcGuidDevice);
 }
 
-bool SaveWavToFile( MyDirectSoundBuffer* o, const void* data, DWORD size, const char* filepath )
+HRESULT SaveWavToFile( MyDirectSoundBuffer* o, const void* data, DWORD size, const char* filepath )
 {
-	FILE* file = ::fopen( filepath, "w" );
-	if( file )
-	{
-		WAVHEADER	header;
-		{
-			//header.chunkId = FOURCC_RIFF;
-		}
+	DWORD bytesToAllocate = 0;
+	V_RET(o->m_pDSoundBuffer->GetFormat(NULL, 0, &bytesToAllocate));
 
-		::fwrite( data, sizeof(char), size, file );
+	WAVEFORMATEX* lpwfxFormat = (WAVEFORMATEX*) alloca( bytesToAllocate );
+	V_RET(o->m_pDSoundBuffer->GetFormat(lpwfxFormat, bytesToAllocate, NULL));
 
-		//
+	CWaveFile  waveFile;
+	V_RET(waveFile.Open( (char*)filepath, lpwfxFormat, WAVEFILE_WRITE ));
 
-		::fclose( file );
-		return true;
-	}
-	return false;
+	UINT bytesWritten;
+	V_RET(waveFile.Write( size, (BYTE*)data, &bytesWritten ));
+
+	V_RET(waveFile.Close());
+
+	return S_OK;
 }

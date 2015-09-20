@@ -78,12 +78,12 @@ CWaveFile::~CWaveFile()
         SAFE_DELETE_ARRAY( m_pwfx );
 }
 
-#if 0
+#if 1
 //-----------------------------------------------------------------------------
 // Name: CWaveFile::Open()
 // Desc: Opens a wave file for reading
 //-----------------------------------------------------------------------------
-HRESULT CWaveFile::Open( LPWSTR strFileName, WAVEFORMATEX* pwfx, DWORD dwFlags )
+HRESULT CWaveFile::Open( char* strFileName, WAVEFORMATEX* pwfx, DWORD dwFlags )
 {
     HRESULT hr;
 
@@ -96,7 +96,7 @@ HRESULT CWaveFile::Open( LPWSTR strFileName, WAVEFORMATEX* pwfx, DWORD dwFlags )
             return E_INVALIDARG;
         SAFE_DELETE_ARRAY( m_pwfx );
 
-        m_hmmio = mmioOpen( strFileName, NULL, MMIO_ALLOCBUF | MMIO_READ );
+        m_hmmio = mmioOpenA( strFileName, NULL, MMIO_ALLOCBUF | MMIO_READ );
 
         if( NULL == m_hmmio )
         {
@@ -106,9 +106,9 @@ HRESULT CWaveFile::Open( LPWSTR strFileName, WAVEFORMATEX* pwfx, DWORD dwFlags )
             VOID* pvRes;
 
             // Loading it as a file failed, so try it as a resource
-            if( NULL == ( hResInfo = FindResource( NULL, strFileName, L"WAVE" ) ) )
+            if( NULL == ( hResInfo = FindResource( NULL, strFileName, "WAVE" ) ) )
             {
-                if( NULL == ( hResInfo = FindResource( NULL, strFileName, L"WAV" ) ) )
+                if( NULL == ( hResInfo = FindResource( NULL, strFileName, "WAV" ) ) )
                     return DXTRACE_ERR( L"FindResource", E_FAIL );
             }
 

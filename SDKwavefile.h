@@ -42,7 +42,7 @@ public:
             CWaveFile();
             ~CWaveFile();
 
-    HRESULT Open( LPWSTR strFileName, WAVEFORMATEX* pwfx, DWORD dwFlags );
+    HRESULT Open( char* strFileName, WAVEFORMATEX* pwfx, DWORD dwFlags );
     HRESULT OpenFromMemory( BYTE* pbData, ULONG ulDataSize, WAVEFORMATEX* pwfx, DWORD dwFlags );
     HRESULT Close();
 

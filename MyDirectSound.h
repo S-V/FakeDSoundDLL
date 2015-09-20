@@ -57,7 +57,8 @@ struct WAVHEADER
 
     // —одержит символы "RIFF" в ASCII кодировке
     // (0x52494646 в big-endian представлении)
-    char chunkId[4];
+    //char chunkId[4];
+    DWORD	chunkId;
 
     // 36 + subchunk2Size, или более точно:
     // 4 + (8 + subchunk1Size) + (8 + subchunk2Size)
@@ -68,14 +69,16 @@ struct WAVHEADER
 
     // —одержит символы "WAVE"
     // (0x57415645 в big-endian представлении)
-    char format[4];
+    //char format[4];
+    DWORD	format;
 
     // ‘ормат "WAVE" состоит из двух подцепочек: "fmt " и "data":
     // ѕодцепочка "fmt " описывает формат звуковых данных:
     
     // —одержит символы "fmt "
     // (0x666d7420 в big-endian представлении)
-    char subchunk1Id[4];
+    //char subchunk1Id[4];
+    DWORD	subchunk1Id;
 
     // 16 дл€ формата PCM.
     // Ёто оставшийс€ размер подцепочки, начина€ с этой позиции.
@@ -115,4 +118,4 @@ struct WAVHEADER
     // ƒалее следуют непосредственно Wav данные.
 };
 
-bool SaveWavToFile( MyDirectSoundBuffer* o, const void* data, DWORD size, const char* filepath );
+HRESULT SaveWavToFile( MyDirectSoundBuffer* o, const void* data, DWORD size, const char* filepath );

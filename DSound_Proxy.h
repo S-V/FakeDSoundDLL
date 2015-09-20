@@ -12,7 +12,7 @@
 //NOTE: no error checking is performed!
 
 // comment out to disable logging
-#define LOG_FILE_NAME	"R:/dsound_log.txt"
+//#define LOG_FILE_NAME	"R:/dsound_log.txt"
 
 // folder where .wav files will be saved
 #define OUTPUT_FOLDER	"R:/temp/"

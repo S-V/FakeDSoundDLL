@@ -176,8 +176,7 @@ HRESULT __stdcall MyDirectSoundBuffer::Lock(THIS_ DWORD dwOffset, DWORD dwBytes,
 											__deref_out_bcount(*pdwAudioBytes1) LPVOID *ppvAudioPtr1, __out LPDWORD pdwAudioBytes1,
 											__deref_opt_out_bcount(*pdwAudioBytes2) LPVOID *ppvAudioPtr2, __out_opt LPDWORD pdwAudioBytes2, DWORD dwFlags)
 {
-	M_TRACE("%d: Lock(): dwOffset=%d, dwBytes=%d, flags=%d\n",
-		m_uniqueId, dwOffset, dwBytes, dwFlags);
+	M_TRACE("%d: Lock(): dwOffset=%d, dwBytes=%d, flags=%d\n", m_uniqueId, dwOffset, dwBytes, dwFlags);
 
 	if( m_bufferSize ) {
 		M_ASSERT2(dwBytes <= m_bufferSize, "dwBytes=%d, m_bufferSize=%d\n", dwBytes, m_bufferSize);
@@ -237,7 +236,7 @@ HRESULT __stdcall MyDirectSoundBuffer::Lock(THIS_ DWORD dwOffset, DWORD dwBytes,
 		m_bytes = 0;
 		m_flags = 0;
 
-		//M_TRACE("Lock(%d): calling m_pDSoundBuffer->Lock()\n", m_uniqueId);
+		//M_TRACE("%d: Lock(): calling m_pDSoundBuffer->Lock()\n", m_uniqueId);
 
 		HRESULT hr = m_pDSoundBuffer->Lock(
 			dwOffset, dwBytes,
