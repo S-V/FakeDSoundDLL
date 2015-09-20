@@ -40,7 +40,7 @@ void MyDirectSound::RemoveBuffer( MyDirectSoundBuffer* buffer )
 	m_createdBuffers.erase(std::remove(m_createdBuffers.begin(), m_createdBuffers.end(), buffer), m_createdBuffers.end());
 }
 
-void MyDirectSound::SaveSoundBlock( const void* data, DWORD size )
+void MyDirectSound::SaveSoundBlock( MyDirectSoundBuffer* o, const void* data, DWORD size )
 {
 	M_ASSERT(data != NULL);
 	M_ASSERT(size > 0);
@@ -63,12 +63,7 @@ void MyDirectSound::SaveSoundBlock( const void* data, DWORD size )
 		strcat_s(filepath, buffer);
 		strcat_s(filepath, ".wav");
 
-		FILE* file = ::fopen( filepath, "w" );
-		if( file )
-		{
-			::fwrite( data, sizeof(char), size, file );
-			::fclose( file );
-		}
+		SaveWavToFile( o, data, size, filepath );
 
 #endif // if defined (OUTPUT_FOLDER)
 
@@ -175,4 +170,24 @@ HRESULT __stdcall MyDirectSound::Initialize(THIS_ __in_opt LPCGUID pcGuidDevice)
 {
 	M_TRACE_FUNCTION;
 	return m_pDSound->Initialize(pcGuidDevice);
+}
+
+bool SaveWavToFile( MyDirectSoundBuffer* o, const void* data, DWORD size, const char* filepath )
+{
+	FILE* file = ::fopen( filepath, "w" );
+	if( file )
+	{
+		WAVHEADER	header;
+		{
+			//header.chunkId = FOURCC_RIFF;
+		}
+
+		::fwrite( data, sizeof(char), size, file );
+
+		//
+
+		::fclose( file );
+		return true;
+	}
+	return false;
 }

@@ -115,9 +115,13 @@ bool IsLogging();
 //	DEBUGGING
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-#define M_TRACE( format,...)\
-	Logf( __FILE__ "(" TO_STR(__LINE__) "): " format, ##__VA_ARGS__ )
-
+#if 1
+	#define M_TRACE( format,...)\
+		Logf( format, ##__VA_ARGS__ )
+#else
+	#define M_TRACE( format,...)\
+		Logf( __FILE__ "(" TO_STR(__LINE__) "): " format, ##__VA_ARGS__ )
+#endif
 
 #define M_TRACE_FUNCTION	M_TRACE( __FUNCTION__ "\n" )
 

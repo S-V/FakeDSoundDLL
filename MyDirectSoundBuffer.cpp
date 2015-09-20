@@ -31,7 +31,7 @@ MyDirectSoundBuffer::~MyDirectSoundBuffer()
 {
 	//M_TRACE_FUNCTION;
 	if( m_alignedBuffer ) {
-		M_TRACE("Free 0x%p (%d bytes)\n", (void*)m_alignedBuffer, m_allocated);
+		M_TRACE("%d: Free 0x%p (%d bytes)\n", m_uniqueId, (void*)m_alignedBuffer, m_allocated);
 		_aligned_free(m_alignedBuffer);
 		m_alignedBuffer = 0;
 	}
@@ -59,7 +59,7 @@ ULONG __stdcall MyDirectSoundBuffer::AddRef(void)
 
 ULONG __stdcall MyDirectSoundBuffer::Release(void)
 {  
-	M_TRACE("Release(%d)\n", m_uniqueId);
+	M_TRACE("%d: Release()\n", m_uniqueId);
 	m_pDSoundDevice->RemoveBuffer(this);
 	// NOTE: all objects dependent on IDirectSoundBuffer* must be released.
 	ULONG count = m_pDSoundBuffer->Release();
@@ -76,7 +76,9 @@ HRESULT __stdcall MyDirectSoundBuffer::GetCaps(THIS_ __out LPDSBCAPS pDSBufferCa
 HRESULT __stdcall MyDirectSoundBuffer::GetCurrentPosition(THIS_ __out_opt LPDWORD pdwCurrentPlayCursor, __out_opt LPDWORD pdwCurrentWriteCursor)
 {
 	HRESULT hr = m_pDSoundBuffer->GetCurrentPosition(pdwCurrentPlayCursor, pdwCurrentWriteCursor);
-	M_TRACE("GetCurrentPosition( %d, %d )\n", *pdwCurrentPlayCursor, *pdwCurrentWriteCursor );
+	//DWORD dwCurrentPlayCursor = pdwCurrentPlayCursor ? *pdwCurrentPlayCursor : -1;
+	//DWORD dwCurrentWriteCursor = pdwCurrentWriteCursor ? *pdwCurrentWriteCursor : -1;
+	//M_TRACE("GetCurrentPosition(%d): PlayCursor = %d, WriteCursor = %d\n", m_uniqueId, dwCurrentPlayCursor, dwCurrentWriteCursor );
 	return hr;
 }
 
@@ -118,19 +120,20 @@ HRESULT __stdcall MyDirectSoundBuffer::Initialize(THIS_ __in LPDIRECTSOUND pDire
 
 HRESULT __stdcall MyDirectSoundBuffer::Play(THIS_ DWORD dwReserved1, DWORD dwPriority, DWORD dwFlags)
 {
-	M_TRACE_FUNCTION;
+	M_TRACE("%d: Play(): dwPriority=%d, dwFlags=%d\n", m_uniqueId, dwPriority, dwFlags);
 	return m_pDSoundBuffer->Play(dwReserved1, dwPriority, dwFlags);
 }
 
 HRESULT __stdcall MyDirectSoundBuffer::SetCurrentPosition(THIS_ DWORD dwNewPosition)
 {
-	M_TRACE_FREQUENT_FUNCTION;
+	M_TRACE("%d: SetCurrentPosition(): dwNewPosition=%d\n", m_uniqueId, dwNewPosition);
 	return m_pDSoundBuffer->SetCurrentPosition(dwNewPosition);
 }
 
 HRESULT __stdcall MyDirectSoundBuffer::SetFormat(THIS_ __in LPCWAVEFORMATEX pcfxFormat)
 {
-	M_TRACE_FUNCTION;
+	M_TRACE("%d: SetFormat(): wFormatTag=%d, nChannels=%d, wBitsPerSample=%d\n",
+		m_uniqueId, pcfxFormat->wFormatTag, pcfxFormat->nChannels, pcfxFormat->wBitsPerSample);
 	return m_pDSoundBuffer->SetFormat(pcfxFormat);
 }
 
@@ -146,6 +149,8 @@ HRESULT __stdcall MyDirectSoundBuffer::SetPan(THIS_ LONG lPan)
 	return m_pDSoundBuffer->SetPan(lPan);
 }
 
+/// The SetFrequency method sets the frequency, in hertz (Hz), at which the audio samples are played.
+/// A value of DSBFREQUENCY_ORIGINAL resets the frequency to the default value of the buffer format.
 HRESULT __stdcall MyDirectSoundBuffer::SetFrequency(THIS_ DWORD dwFrequency)
 {
 	M_TRACE_FREQUENT_FUNCTION;
@@ -169,7 +174,7 @@ HRESULT __stdcall MyDirectSoundBuffer::Lock(THIS_ DWORD dwOffset, DWORD dwBytes,
 											__deref_out_bcount(*pdwAudioBytes1) LPVOID *ppvAudioPtr1, __out LPDWORD pdwAudioBytes1,
 											__deref_opt_out_bcount(*pdwAudioBytes2) LPVOID *ppvAudioPtr2, __out_opt LPDWORD pdwAudioBytes2, DWORD dwFlags)
 {
-	M_TRACE("Lock(%d): dwOffset=%d, dwBytes=%d, flags=%d\n",
+	M_TRACE("%d: Lock(): dwOffset=%d, dwBytes=%d, flags=%d\n",
 		m_uniqueId, dwOffset, dwBytes, dwFlags);
 
 	if( m_bufferSize ) {
@@ -205,14 +210,14 @@ HRESULT __stdcall MyDirectSoundBuffer::Lock(THIS_ DWORD dwOffset, DWORD dwBytes,
 			// resize memory buffer, if needed
 			if( dwBytes > m_allocated )
 			{
-				M_TRACE("Lock(%d): realloc %d -> %d\n", m_uniqueId, m_allocated, dwBytes);
+				M_TRACE("%d: Lock(): realloc %d -> %d\n", m_uniqueId, m_allocated, dwBytes);
 				_aligned_free(m_alignedBuffer);
 				m_alignedBuffer = _aligned_malloc(dwBytes, SOUND_BUFFER_ALIGNMENT);
 				m_allocated = dwBytes;
 			}
 			m_bytes = dwBytes;
 		}
-		M_TRACE("Lock(%d): START RECORDING\n", m_uniqueId);
+		M_TRACE("%d: Lock(): START RECORDING\n", m_uniqueId);
 
 		m_flags = dwFlags;
 
@@ -248,18 +253,18 @@ HRESULT __stdcall MyDirectSoundBuffer::Lock(THIS_ DWORD dwOffset, DWORD dwBytes,
 HRESULT __stdcall MyDirectSoundBuffer::Unlock(THIS_ __in_bcount(dwAudioBytes1) LPVOID pvAudioPtr1, DWORD dwAudioBytes1,
 											  __in_bcount_opt(dwAudioBytes2) LPVOID pvAudioPtr2, DWORD dwAudioBytes2)
 {
-	M_TRACE("Unlock(%d): dwAudioBytes1=%d, dwAudioBytes2=%d\n", m_uniqueId, dwAudioBytes1, dwAudioBytes2);
+	M_TRACE("%d: Unlock(): dwAudioBytes1=%d, dwAudioBytes2=%d\n", m_uniqueId, dwAudioBytes1, dwAudioBytes2);
 	bool recording = (m_bytes != 0);
 	if( recording )
 	{
-		M_TRACE("Unlock(%d): FINISH RECORDING\n", m_uniqueId);
+		M_TRACE("%d: Unlock(): FINISH RECORDING\n", m_uniqueId);
 
 		// http://blog.nektra.com/main/2009/02/24/directsound-capture-using-deviare/#2.1.Direct%20Sound%20Capturing%7Coutline
 		// At this point, the user is telling DirectSound that he has finished writing his wave output
 		// and the locks may be released. So, if we step in between, we can safely read the buffer.
 		// The user is no longer writing to it, and DirectSound has not yet taken control of it.
 
-		m_pDSoundDevice->SaveSoundBlock( m_alignedBuffer, m_bytes );
+		m_pDSoundDevice->SaveSoundBlock( this, m_alignedBuffer, m_bytes );
 
 		LPVOID 	lock_pvAudioPtr1 = NULL;
 		DWORD	lock_dwAudioBytes1 = 0;

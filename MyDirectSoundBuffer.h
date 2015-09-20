@@ -8,7 +8,7 @@ class MyDirectSound;
 
 enum { SOUND_BUFFER_ALIGNMENT = 16 };
 
-class MyDirectSoundBuffer : public IDirectSoundBuffer
+struct MyDirectSoundBuffer : public IDirectSoundBuffer
 {
 	IDirectSoundBuffer *	m_pDSoundBuffer;
 	MyDirectSound *			m_pDSoundDevice;
