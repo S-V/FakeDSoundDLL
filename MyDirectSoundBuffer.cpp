@@ -60,10 +60,12 @@ ULONG __stdcall MyDirectSoundBuffer::AddRef(void)
 ULONG __stdcall MyDirectSoundBuffer::Release(void)
 {  
 	M_TRACE("%d: Release()\n", m_uniqueId);
-	m_pDSoundDevice->RemoveBuffer(this);
-	// NOTE: all objects dependent on IDirectSoundBuffer* must be released.
 	ULONG count = m_pDSoundBuffer->Release();
-	delete this;
+	if( !count ) {
+		// NOTE: all objects dependent on IDirectSoundBuffer* must be released.
+		m_pDSoundDevice->RemoveBuffer(this);
+		delete this;
+	}
 	return count;
 }
 

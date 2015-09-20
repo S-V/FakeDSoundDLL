@@ -98,9 +98,11 @@ ULONG __stdcall MyDirectSound::AddRef(void)
 ULONG __stdcall MyDirectSound::Release(void)
 {  
 	M_TRACE_FUNCTION;
-	// NOTE: all objects dependent on IDirectSound* must be released.
 	ULONG count = m_pDSound->Release();
-	delete this;
+	if( !count ) {
+		// NOTE: all objects dependent on IDirectSound* must be released.
+		delete this;
+	}
 	return count;
 }
 /// The CreateSoundBuffer method creates a sound buffer object to manage audio samples. 
