@@ -1,0 +1,6 @@
+LIBRARY	"Dsound"
+
+EXPORTS
+	DirectSoundCreate @1
+	GetDeviceID @9
+	DirectSoundCreate8 @11
