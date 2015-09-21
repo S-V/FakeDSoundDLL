@@ -10,45 +10,14 @@
 //-----------------------------------------------------------------------------
 #include "stdafx.h"
 #include "SDKwavefile.h"
-
+#include "DSound_Proxy.h"
 
 #undef min // use __min instead
 #undef max // use __max instead
 
-
-#if defined(DEBUG) || defined(_DEBUG)
-#ifndef V
-#define V(x)           { hr = (x); if( FAILED(hr) ) { DXUTTrace( __FILE__, (DWORD)__LINE__, hr, L#x, true ); } }
-#endif
-#ifndef V_RETURN
-#define V_RETURN(x)    { hr = (x); if( FAILED(hr) ) { return DXUTTrace( __FILE__, (DWORD)__LINE__, hr, L#x, true ); } }
-#endif
-#else
-#ifndef V
-#define V(x)           { hr = (x); }
-#endif
-#ifndef V_RETURN
-#define V_RETURN(x)    { hr = (x); if( FAILED(hr) ) { return hr; } }
-#endif
-#endif
-
-#ifndef SAFE_DELETE
-#define SAFE_DELETE(p)       { if (p) { delete (p);     (p)=NULL; } }
-#endif
-#ifndef SAFE_DELETE_ARRAY
-#define SAFE_DELETE_ARRAY(p) { if (p) { delete[] (p);   (p)=NULL; } }
-#endif
-#ifndef SAFE_RELEASE
-#define SAFE_RELEASE(p)      { if (p) { (p)->Release(); (p)=NULL; } }
-#endif
-
-
-
 #define DXTRACE_MSG(str)              (0L)
 #define DXTRACE_ERR(str,hr)           (hr)
 #define DXTRACE_ERR_MSGBOX(str,hr)    (hr)
-
-
 
 //-----------------------------------------------------------------------------
 // Name: CWaveFile::CWaveFile()
@@ -78,7 +47,6 @@ CWaveFile::~CWaveFile()
         SAFE_DELETE_ARRAY( m_pwfx );
 }
 
-#if 1
 //-----------------------------------------------------------------------------
 // Name: CWaveFile::Open()
 // Desc: Opens a wave file for reading
@@ -168,7 +136,6 @@ HRESULT CWaveFile::Open( char* strFileName, WAVEFORMATEX* pwfx, DWORD dwFlags )
 
     return hr;
 }
-#endif
 
 //-----------------------------------------------------------------------------
 // Name: CWaveFile::OpenFromMemory()

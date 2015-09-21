@@ -9,6 +9,7 @@ MyDirectSoundBuffer::MyDirectSoundBuffer(
 	int nUniqueID
 	)
 	: m_pDSoundBuffer( pDSoundBuffer ), m_pDSoundDevice( pDSoundDevice ), m_uniqueId( nUniqueID )
+	, m_refCount(1)
 {
 	//M_TRACE_FUNCTION;
 	m_bufferSize = pcDSBufferDesc->dwBufferBytes;
@@ -30,6 +31,8 @@ MyDirectSoundBuffer::MyDirectSoundBuffer(
 MyDirectSoundBuffer::~MyDirectSoundBuffer()
 {
 	//M_TRACE_FUNCTION;
+	SAFE_RELEASE( m_pDSoundBuffer );
+
 	if( m_alignedBuffer ) {
 		M_TRACE("%d: Free 0x%p (%d bytes)\n", m_uniqueId, (void*)m_alignedBuffer, m_allocated);
 		_aligned_free(m_alignedBuffer);
@@ -54,19 +57,20 @@ HRESULT __stdcall MyDirectSoundBuffer::QueryInterface(REFIID riid, void** ppvObj
 ULONG __stdcall MyDirectSoundBuffer::AddRef(void)
 {
 	M_TRACE_FUNCTION;
-	return m_pDSoundBuffer->AddRef();
+	return InterlockedIncrement(&m_refCount);
 }
 
 ULONG __stdcall MyDirectSoundBuffer::Release(void)
 {  
 	M_TRACE("%d: Release()\n", m_uniqueId);
-	ULONG count = m_pDSoundBuffer->Release();
-	if( !count ) {
-		// NOTE: all objects dependent on IDirectSoundBuffer* must be released.
+    ULONG returnValue = InterlockedDecrement(&m_refCount);
+    if (returnValue == 0)
+    {
+        // NOTE: all objects dependent on IDirectSoundBuffer* must be released.
 		m_pDSoundDevice->RemoveBuffer(this);
 		delete this;
-	}
-	return count;
+    }
+    return returnValue;
 }
 
 HRESULT __stdcall MyDirectSoundBuffer::GetCaps(THIS_ __out LPDSBCAPS pDSBufferCaps)
@@ -218,7 +222,7 @@ HRESULT __stdcall MyDirectSoundBuffer::Lock(THIS_ DWORD dwOffset, DWORD dwBytes,
 			}
 			m_bytes = dwBytes;
 		}
-		M_TRACE("%d: Lock(): START RECORDING\n", m_uniqueId);
+		//M_TRACE("%d: Lock(): START RECORDING\n", m_uniqueId);
 
 		m_flags = dwFlags;
 
@@ -258,7 +262,7 @@ HRESULT __stdcall MyDirectSoundBuffer::Unlock(THIS_ __in_bcount(dwAudioBytes1) L
 	bool recording = (m_bytes != 0);
 	if( recording )
 	{
-		M_TRACE("%d: Unlock(): FINISH RECORDING\n", m_uniqueId);
+		//M_TRACE("%d: Unlock(): FINISH RECORDING\n", m_uniqueId);
 
 		// http://blog.nektra.com/main/2009/02/24/directsound-capture-using-deviare/#2.1.Direct%20Sound%20Capturing%7Coutline
 		// At this point, the user is telling DirectSound that he has finished writing his wave output

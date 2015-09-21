@@ -141,8 +141,19 @@ HRESULT __stdcall MyDirectSound::GetCaps(THIS_ __out LPDSCAPS pDSCaps)
 /// ppDSBufferDuplicate - Address of a variable that receives the IDirectSoundBuffer interface pointer for the new buffer.
 HRESULT __stdcall MyDirectSound::DuplicateSoundBuffer(THIS_ __in LPDIRECTSOUNDBUFFER pDSBufferOriginal, __deref_out LPDIRECTSOUNDBUFFER *ppDSBufferDuplicate)
 {
+#if 0//USE_SOUND_BUFFER_PROXY
+	IDirectSoundBuffer* pDSBufferDuplicate = NULL;
+	V_RET(m_pDSound->DuplicateSoundBuffer(pDSBufferOriginal, pDSBufferDuplicate));
+
+	const int soundBufferId = m_nextSoundBufferId++;
+	MyDirectSoundBuffer* pOriginal = static_cast< MyDirectSoundBuffer* >( pDSBufferOriginal );
+	MyDirectSoundBuffer* pDuplicate = new MyDirectSoundBuffer( pcDSBufferDesc, pDSBuffer, this, soundBufferId );
+	M_TRACE("DuplicateSoundBuffer(): %d -> %d (%d bytes)\n", soundBufferId, pOriginal->dwBufferBytes);
+	return DS_OK;
+#else
 	M_TRACE_FREQUENT_FUNCTION;
 	return m_pDSound->DuplicateSoundBuffer(pDSBufferOriginal, ppDSBufferDuplicate);
+#endif
 }
 
 HRESULT __stdcall MyDirectSound::SetCooperativeLevel(THIS_ HWND hwnd, DWORD dwLevel)
@@ -177,6 +188,10 @@ HRESULT __stdcall MyDirectSound::Initialize(THIS_ __in_opt LPCGUID pcGuidDevice)
 
 HRESULT SaveWavToFile( MyDirectSoundBuffer* o, const void* data, DWORD size, const char* filepath )
 {
+	// The WAVEFORMATEX structure can have a variable length that depends on the details of the format.
+	// Before retrieving the format description, the application should query the DirectSoundBuffer object
+	// for the size of the format by calling this method and specifying NULL for the lpwfxFormat parameter.
+	// The size of the structure will be returned in the lpdwSizeWritten parameter. 
 	DWORD bytesToAllocate = 0;
 	V_RET(o->m_pDSoundBuffer->GetFormat(NULL, 0, &bytesToAllocate));
 

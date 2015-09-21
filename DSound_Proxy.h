@@ -12,7 +12,7 @@
 //NOTE: no error checking is performed!
 
 // comment out to disable logging
-//#define LOG_FILE_NAME	"R:/dsound_log.txt"
+#define LOG_FILE_NAME	"R:/dsound_log.txt"
 
 // folder where .wav files will be saved
 #define OUTPUT_FOLDER	"R:/temp/"
@@ -152,6 +152,34 @@ bool IsLogging();
 		}
 #else
 	#define ASK_TO_ATTACH_DEBUGGER	__noop
+#endif
+
+
+
+#if defined(DEBUG) || defined(_DEBUG)
+#ifndef V
+#define V(x)           { hr = (x); if( FAILED(hr) ) { DXUTTrace( __FILE__, (DWORD)__LINE__, hr, L#x, true ); } }
+#endif
+#ifndef V_RETURN
+#define V_RETURN(x)    { hr = (x); if( FAILED(hr) ) { return DXUTTrace( __FILE__, (DWORD)__LINE__, hr, L#x, true ); } }
+#endif
+#else
+#ifndef V
+#define V(x)           { hr = (x); }
+#endif
+#ifndef V_RETURN
+#define V_RETURN(x)    { hr = (x); if( FAILED(hr) ) { return hr; } }
+#endif
+#endif
+
+#ifndef SAFE_DELETE
+#define SAFE_DELETE(p)       { if (p) { delete (p);     (p)=NULL; } }
+#endif
+#ifndef SAFE_DELETE_ARRAY
+#define SAFE_DELETE_ARRAY(p) { if (p) { delete[] (p);   (p)=NULL; } }
+#endif
+#ifndef SAFE_RELEASE
+#define SAFE_RELEASE(p)      { if (p) { (p)->Release(); (p)=NULL; } }
 #endif
 
 

@@ -14,6 +14,7 @@ struct MyDirectSoundBuffer : public IDirectSoundBuffer
 	MyDirectSound *			m_pDSoundDevice;
 	DWORD					m_bufferSize;	// 0 if primary buffer
 	const int				m_uniqueId;		// for debugging
+	LONG					m_refCount;
 
 	void *	m_alignedBuffer;	// buffer for capturing WAV files
 	DWORD	m_allocated;
