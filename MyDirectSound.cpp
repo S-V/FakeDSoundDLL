@@ -198,6 +198,30 @@ HRESULT SaveWavToFile( MyDirectSoundBuffer* o, const void* data, DWORD size, con
 	WAVEFORMATEX* lpwfxFormat = (WAVEFORMATEX*) alloca( bytesToAllocate );
 	V_RET(o->m_pDSoundBuffer->GetFormat(lpwfxFormat, bytesToAllocate, NULL));
 
+
+#ifdef FOLDER_TO_SAVE_WAVEFORMATEX
+	{
+		const UINT64 format_hash = MurmurHash64( lpwfxFormat, bytesToAllocate );
+
+		// generate unique file name
+		char buffer[32];
+		sprintf(buffer, "%016llX", format_hash);
+
+		char filepath[MAX_PATH];
+		strcpy_s(filepath, FOLDER_TO_SAVE_WAVEFORMATEX);
+		strcat_s(filepath, buffer);
+		strcat_s(filepath, ".wav_header");
+
+		FILE* pFile = ::fopen( filepath, "w" );
+		if( pFile )
+		{
+			::fwrite( lpwfxFormat, sizeof(char), bytesToAllocate, pFile );
+			::fclose( pFile );
+			pFile = NULL;
+		}
+	}
+#endif
+
 	CWaveFile  waveFile;
 	V_RET(waveFile.Open( (char*)filepath, lpwfxFormat, WAVEFILE_WRITE ));
 

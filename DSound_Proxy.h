@@ -17,6 +17,9 @@
 // folder where .wav files will be saved
 #define OUTPUT_FOLDER	"R:/temp/"
 
+// WAVEFORMATEX structs are saved in this folder
+//#define FOLDER_TO_SAVE_WAVEFORMATEX	"R:/temp2/"
+
 #define USE_SOUND_BUFFER_PROXY	(1)
 
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
